@@ -24,7 +24,7 @@ exports.getUerHandler = async (req, res) => {
             res.status(StatusCodes.OK).json({ message: "succcess", data })
         }
     } catch (error) {
-        res.status(StatusCodes.BAD_REQUEST).json({ Error: error.message })
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ Error: error.message })
     }
 }
 
