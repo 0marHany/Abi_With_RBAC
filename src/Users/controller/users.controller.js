@@ -24,7 +24,7 @@ exports.getUerHandler = async (req, res) => {
             res.status(StatusCodes.OK).json({ message: "succcess", data })
         }
     } catch (error) {
-        res.status(StatusCodes.BAD_REQUEST).json({ Error: error.message })
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ Error: error.message })
     }
 }
 
@@ -70,6 +70,7 @@ exports.signInHandler = async (req, res) => {
             if (match) {
                 // to get all data without password && repeat_password by use .select("-")
                 // const data = await User.findOne({ email }).select("-password").select("-repeat_password");
+                // Destructuring        //from data
                 const { password, repeat_password, ...data } = user._doc;//do same but without need to get data from db agin
                 let token = jwt.sign({ _id: data._id }, process.env.Secret_key, { expiresIn: '1d' })
                 res.status(StatusCodes.ACCEPTED).json({ message: "success login", token, data })
