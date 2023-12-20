@@ -3,18 +3,13 @@ const { StatusCodes } = require("http-status-codes")
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const sendEmail = require("../../../services/Sendmail");
+const pagginationServices = require("../../../services/paggination");
 
 exports.getUerHandler = async (req, res) => {
-    let { page, limit, searchKey } = req.query;
+    let { page, size, searchKey } = req.query;
     try {
-        if (page || limit) {
-            if (!limit) {
-                limit = 3
-            }
-            if (!page) {
-                page = 1
-            }
-            const skip = parseInt((page - 1) * limit);
+        if (page || size) {
+            const { limit, skip } = pagginationServices(page, size)
             const data = await User.find({}).limit(limit).skip(skip);
             res.status(StatusCodes.OK).json({ message: "succcess", data })
         } else if (searchKey) {
@@ -54,7 +49,8 @@ exports.postUserHandler = async (req, res) => {
                 password,
                 repeat_password, role
             });
-            await data.save()
+            await data.save();
+            const token = jwt.sign({ _id: data._id }, process.env.Secret_key, { expiresIn: '1d' })
             const info = await sendEmail(
                 process.env.SENDER,
                 [email],
@@ -134,7 +130,7 @@ exports.postUserHandler = async (req, res) => {
                 `
             );
             console.log(info);
-            res.status(StatusCodes.CREATED).json({ message: "succcess", data })
+            res.status(StatusCodes.CREATED).json({ message: "succcess", data, token })
         }
     } catch (error) {
         res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ Error: error.message })
@@ -142,7 +138,7 @@ exports.postUserHandler = async (req, res) => {
 }
 exports.VerifiedHandler = async (req, res) => {
     const { token } = req.params;
-    const decode = jwt.verify(token, process.env.sekretkey)
+    const decode = jwt.verify(token, process.env.Secret_key)
     const user = await User.findOne({ _id: decode._id })
     if (user) {
         await User.updateOne({ _id: user._id }, {
