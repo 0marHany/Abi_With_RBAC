@@ -1,4 +1,4 @@
-const { getUerHandler, postUserHandler, putUserHandler, delteUserHandler, signInHandler } = require("../controller/users.controller");
+const { getUerHandler, postUserHandler, putUserHandler, delteUserHandler, signInHandler, VerifiedHandler } = require("../controller/users.controller");
 
 const routes = require("express").Router();
 
@@ -8,6 +8,8 @@ const { addUsersSchema, updateUsersSchema, signInSchema } = require("../joi/user
 const { GetAllUsers, DeletUser } = require("../endPoints");
 
 routes.get("/user", Auth(GetAllUsers), getUerHandler)
+routes.get("/user/verified/:token", VerifiedHandler)
+
 
 routes.post("/user", validate(addUsersSchema), postUserHandler)
 routes.post("/auth", validate(signInSchema), signInHandler)

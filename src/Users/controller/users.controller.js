@@ -2,6 +2,7 @@ const { User } = require("../model/users.model")
 const { StatusCodes } = require("http-status-codes")
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
+const sendEmail = require("../../../services/Sendmail");
 
 exports.getUerHandler = async (req, res) => {
     let { page, limit, searchKey } = req.query;
@@ -54,11 +55,103 @@ exports.postUserHandler = async (req, res) => {
                 repeat_password, role
             });
             await data.save()
+            const info = await sendEmail(
+                process.env.SENDER,
+                [email],
+                "EMAIL VERFICIATION",
+                "confirmation",
+                `    <!DOCTYPE html>
+                            <html lang="en">
+                            <head>
+                              <meta charset="UTF-8">
+                              <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                              <title>Email Confirmation</title>
+                              <style>
+                                body {
+                                  font-family: Arial, sans-serif;
+                                  margin: 0;
+                                  padding: 0;
+                                  background-color: #f4f4f4;
+                                  display: flex;
+                                  align-items: center;
+                                  justify-content: center;
+                                  height: 100vh;
+                                }
+                            
+                                .container {
+                                  max-width: 600px;
+                                  padding: 20px;
+                                  background-color: #ffffff;
+                                  border-radius: 5px;
+                                  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+                                  text-align: center;
+                                }
+                            
+                                h1 {
+                                  color: #333333;
+                                }
+                            
+                                p {
+                                  color: #555555;
+                                }
+                            
+                                .button {
+                                  display: inline-block;
+                                  padding: 10px 20px;
+                                  font-size: 16px;
+                                  text-decoration: none;
+                                  color: #ffffff;
+                                  background-color: #007bff;
+                                  border-radius: 5px;
+                                  cursor: pointer;
+                                }
+                            
+                                .button:hover {
+                                  background-color: #0056b3;
+                                }
+                            
+                                .confirmation-message {
+                                  display: none;
+                                  margin-top: 20px;
+                                  color: #28a745;
+                                  font-weight: bold;
+                                }
+                            
+                                a {
+                                  color: #ffffff;
+                                  text-decoration: none;
+                                }
+                              </style>
+                            </head>
+                            <body>
+                              <div class="container">
+                                <h1>Email Confirmation</h1>
+                                <p>Thank you for signing up! Please confirm your email address by clicking the button below:</p>
+                                <a href="http://localhost:${process.env.port}/user/verified/${token}"><button class="button">Yes, I'm Confirming</button></a>
+                              </div>
+                            </body>
+                            </html>
+                `
+            );
+            console.log(info);
             res.status(StatusCodes.CREATED).json({ message: "succcess", data })
         }
     } catch (error) {
         res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ Error: error.message })
     }
+}
+exports.VerifiedHandler = async (req, res) => {
+    const { token } = req.params;
+    const decode = jwt.verify(token, process.env.sekretkey)
+    const user = await User.findOne({ _id: decode._id })
+    if (user) {
+        await User.updateOne({ _id: user._id }, {
+            verified: true
+        })
+        res.status(StatusCodes.OK).json({ verified: true })
+    }
+    else
+        res.status(StatusCodes.FORBIDDEN).json({ verified: false })
 }
 
 exports.signInHandler = async (req, res) => {
