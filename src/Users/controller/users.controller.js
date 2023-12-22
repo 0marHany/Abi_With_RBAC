@@ -4,19 +4,17 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const sendEmail = require("../../../services/Sendmail");
 const pagginationServices = require("../../../services/paggination");
+const findService = require("../../../services/findService");
 
 exports.getUerHandler = async (req, res) => {
     let { page, size, searchKey } = req.query;
     try {
         if (page || size) {
             const { limit, skip } = pagginationServices(page, size)
-            const data = await User.find({}).limit(limit).skip(skip);
-            res.status(StatusCodes.OK).json({ message: "succcess", data })
-        } else if (searchKey) {
-            const data = await User.find({ firstName: { $regex: searchKey } });
+            const data = await findService(User, searchKey, limit, skip, ["firstName", "email"]);
             res.status(StatusCodes.OK).json({ message: "succcess", data })
         } else {
-            const data = await User.find();
+            const data = await findService(User, searchKey, null, null, ["firstName", "email"])
             res.status(StatusCodes.OK).json({ message: "succcess", data })
         }
     } catch (error) {

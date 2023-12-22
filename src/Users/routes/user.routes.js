@@ -6,8 +6,8 @@ const validate = require("../../../common/middleware/validate");
 const Auth = require("../../../common/middleware/auth");
 const { addUsersSchema, updateUsersSchema, signInSchema } = require("../joi/userValidation");
 const { GetAllUsers, DeletUser } = require("../endPoints");
-
-routes.get("/user", Auth(GetAllUsers), getUerHandler)
+// , Auth(GetAllUsers)
+routes.get("/user", getUerHandler)
 routes.get("/user/verified/:token", VerifiedHandler)
 
 

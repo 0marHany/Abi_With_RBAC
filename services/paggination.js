@@ -1,5 +1,4 @@
 const pagginationServices = function (page, size) {
-    console.log(page, size);
     if (!size) {
         size = 3;
     }

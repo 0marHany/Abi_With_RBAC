@@ -11,18 +11,24 @@ module.exports = (endPoit) => {
             console.log(decode);
             const user = await User.findOne({ _id: decode._id });
             // console.log(user.role);
-            if (!user) {
-                res.status(StatusCodes.UNAUTHORIZED).json({ message: "UNAUTHORIZED" });
-            } else {
-                // req.role = user.role;
-                const isAllowed = await rbac.can(user.role, endPoit)
-                console.log(isAllowed);
-                if (isAllowed) {
-                    next();
+            if (user.verified) {
+                if (!user) {
+                    res.status(StatusCodes.UNAUTHORIZED).json({ message: "UNAUTHORIZED" });
                 } else {
-                    res.status(StatusCodes.UNAUTHORIZED).json({ message: "**************UNAUTHORIZED" });
+                    // req.role = user.role;
+                    const isAllowed = await rbac.can(user.role, endPoit)
+                    console.log(isAllowed);
+                    if (isAllowed) {
+                        next();
+                    } else {
+                        res.status(StatusCodes.UNAUTHORIZED).json({ message: "**************UNAUTHORIZED" });
+                    }
                 }
             }
+            else {
+                res.status(StatusCodes.UNAUTHORIZED).json({ verified: false });
+            }
+
         } catch (error) {
             res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ error: error.message });
         }
