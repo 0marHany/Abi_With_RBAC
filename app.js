@@ -2,13 +2,15 @@ const express = require('express')
 require('dotenv').config()
 
 const app = express()
+
 const dbconnected = require("./configuration/config")
 const userRoutes = require("./src/Users/routes/user.routes")
 const postRoutes = require("./src/Posts/routes/posts.routes")
 const commentRoutes = require("./src/comments/routes/comment.routes")
+const RunJobs = require('./common/services/jobs')
 
 dbconnected()
-
+RunJobs()
 app.use(express.json());
 
 app.use(userRoutes);

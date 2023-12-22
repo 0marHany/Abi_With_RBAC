@@ -2,9 +2,9 @@ const { User } = require("../model/users.model")
 const { StatusCodes } = require("http-status-codes")
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
-const sendEmail = require("../../../services/Sendmail");
-const pagginationServices = require("../../../services/paggination");
-const findService = require("../../../services/findService");
+const sendEmail = require("../../../common/services/Sendmail");
+const pagginationServices = require("../../../common/services/paggination");
+const findService = require("../../../common/services/findService");
 
 exports.getUerHandler = async (req, res) => {
     let { page, size, searchKey } = req.query;
